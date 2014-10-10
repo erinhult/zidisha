@@ -1,1 +1,5 @@
-This is the readme
+Zidisha Analysis files:
+
+I’ve included in this directory some of the files used to analyze data from Zidisha’s SQL database. The analysis was done primarily in Ipython Notebook, and was exploratory in nature, so not all code, charts, figures may be necessary to the codebase. Because this was a short project designed to quickly provide actionable insights to Zidisha, and this code was not intended to be handed over directly to Zidisha, there was less focus on developing a robust codebase, and more focus on efficiency. 
+
+
