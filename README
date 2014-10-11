@@ -1,6 +1,6 @@
 Zidisha Analysis files:
 
-I’ve included in this directory some of the files used to analyze lender retention and balancing borrowing and lending levels for a three week project as an Insight Data Science Fellow. Data was from a local dump of Zidisha’s SQL database. The analysis was done primarily in IPython Notebook, and was exploratory in nature. 
+Included in this directory are files used for a three week project completed as an Insight Data Science Fellow. For this project, I had the opportunity to work with a peer-to-peer micro-finance non-profit, Zidisha (www.zidisha.org). In the project, I investigated two avenues to increasing the funding available to borrowers: lender retention and balancing borrowing and lending levels. Data was from a local dump of Zidisha’s SQL database. The analysis was done primarily in IPython Notebook, and was exploratory in nature. 
 
 IPython Notebooks with plot images can be viewed online here:
 http://nbviewer.ipython.org/github/erinhult/zidisha/
