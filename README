@@ -1,3 +1,6 @@
 Zidisha Analysis files:
 
-I’ve included in this directory some of the files used to analyze data from Zidisha’s SQL database. The analysis was done primarily in Ipython Notebook, and was exploratory in nature. 
+I’ve included in this directory some of the files used to analyze lender retention and balancing borrowing and lending levels for a three week project as an Insight Data Science Fellow. Data was from a local dump of Zidisha’s SQL database. The analysis was done primarily in IPython Notebook, and was exploratory in nature. 
+
+IPython Notebooks with plot images can be viewed online here:
+http://nbviewer.ipython.org/github/erinhult/zidisha/

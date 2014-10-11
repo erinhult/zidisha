@@ -22,19 +22,12 @@ from sklearn.ensemble import RandomForestClassifier
 plt.rcParams['figure.figsize'] =6,4 # plotsize
 
 
-# In[3]:
+# In[942]:
 
 db = mdb.connect(user="root", host="localhost", db="zidisha", charset='utf8')
 dfloans = pd.read_sql("SELECT * from loanapplic  ", db)
-
-db2 = mdb.connect(user="root", host="localhost", db="zidisha", charset='utf8')
-dfbids = pd.read_sql("SELECT * from loanbids  ", db2)
-
-db3 = mdb.connect(user="root", host="localhost", db="zidisha", charset='utf8')
-dflenders = pd.read_sql("SELECT * from lenders  ", db3)
-
-
-
+dfbids = pd.read_sql("SELECT * from loanbids  ", db)
+dflenders = pd.read_sql("SELECT * from lenders  ", db)
 
 
 # Training period data
@@ -86,35 +79,25 @@ LendTab=grpBid.agg({'npE':np.sum,
 LendTab=LendTab.reset_index()
 
 
-# In[5]:
-
-
-
-
-# In[6]:
+# In[946]:
 
 LendTab['dif']=LendTab['naE']-LendTab['npE']
-LendTab['difdol']=LendTab['amtaftE']-LendTab['amtpreE']
+LendTab['difdol']=(LendTab['amtaftE']-LendTab['amtpreE'])/NM
 
 
-# In[7]:
+# In[947]:
 
 # Personal Emails were sent to all inactive users (joining before May 2014)
 # Does email make a difference? Ie, do more lend (or lend more money) 
 # in the months following the email?
 
-# Pull only users joining prior to 
+# Pull only users joining prior to date listed
 
 olderUsers=LendTab[LendTab['biddate']<time.mktime(datetime.datetime(2014,2,1)                                          .timetuple()) ]
 nonzer=olderUsers[olderUsers['difdol']!=0]
 
 
-# In[914]:
-
-
-
-
-# In[940]:
+# In[948]:
 
 print('Number of older, inactive lenders receiving personal email: %i'% (len(olderUsers)))
 print('Number of lenders with non-zero lending after email: %i' % (len(nonzer)))
@@ -122,26 +105,25 @@ print('Mean difference in monthly lending (post-pre): $%f' %       (sum(olderUse
 print('Mean difference of non-zero values: $%f' % (sum(nonzer['difdol'])/len(nonzer['difdol'])))
 
 
-# In[941]:
+# In[949]:
 
 fig, ax = plt.subplots()
-plt.hist(list(olderUsers['difdol']),40)
+plt.hist(list(olderUsers['difdol']),40);
 ylabel('number of lenders')
-xlabel('difference in lending')
+xlabel('difference in lending');
 
 
-# Now, let's look at those who joined more recently. [Note, we've skipped over those who joined between 2/1 and 5/1 2014. This is in part because for the older users, we wanted to do a before/after comparison, and so did not want users who's before period was less than the full 2 months, and also because the large surge of lenders who joined in April had atypical behavior.
+# The figure above shows the increase in lending amongst inactive lenders who received a personal email from Zidisha staff. Emails were sent in spring of 2014, and comparison was the difference between the mean of two months prior and two months post-email. Most commonly, there was no difference, as users were inactive and remained inactive. A few lenders had made a loan in the two months prior and did not make a loan in the post period (negative values), but a larger number had increased lending in the post period. The mean effect was an increase in lending of $1.19/month, so not a whole lot. 
+# 
+# ------------------------------------------------------------------------------------------------
+
+# Now, let's look at the impact of emails to those who joined more recently. [Note, we've skipped over those who joined between 2/1 and 5/1 2014. This is in part because for the older users, we wanted to do a before/after comparison, and so did not want users who's before period was less than the full 2 months, and also because the large surge of lenders who joined in April had atypical behavior.
 # 
 # Here, sometimes the email came pretty quickly after joining, so using before / after email may be challenging. 
 # 
 # Ideally, we want to compare loans per month ($/mon) for those who got an email, with those joining at the same time who did not. The tricky part is, emails do not always come a consistent length of time after joining, so which period should be used as comparison? Here I calculated the median time between a lender's first bid and receiving the personal email to get an 'effective time until email', that I could use for the control group that did not receive personal emails. 
 # 
 # 
-
-# In[8]:
-
-
-
 
 # In[739]:
 
@@ -161,6 +143,7 @@ newerU.rename(columns={'biddate':'joindate'}, inplace=True)
 rebid=pd.merge(newerU[['lenderid','efEmail','joindate','email']],bidsA[['lenderid','biddate',               'givenamount']],
                left_on='lenderid',right_on='lenderid',how='left')
 
+#Calculate money lent in each of the 1,2,3,4th months following email receipt
 
 rebid['mon1lend']=rebid['givenamount']*((rebid['biddate']>rebid['efEmail'])                                        &(rebid['biddate']<(rebid['efEmail']+
                                     (1.*86400*365*1/12))))
@@ -213,12 +196,7 @@ newComp['mon3act']=[int(x>0) if np.isfinite(x) else np.nan                    fo
 newComp['postSum']=[nanmean([x,y,z]) for x,y,z in                            zip(newComp['mon1lend'],newComp['mon2lend'],                                newComp['mon3lend'])]
 
 
-# In[741]:
-
-
-
-
-# In[742]:
+# In[950]:
 
 figure(num=None, figsize=(9, 4))
 a=subplot(1,2,1)
@@ -238,12 +216,12 @@ b.set_ylabel('fraction active')
 
 # The graph above compares lending and activity for control (blue) and treatment (red) groups, using all of the data in that time period. The main issue here is that lending levels were quite different before the emails were sent, making it difficult to interpret the lending levels after the email was sent. 
 
-# In[743]:
+# In[951]:
 
 lendingbymonth
 
 
-# In[744]:
+# In[952]:
 
 activitybymonth
 
@@ -252,7 +230,7 @@ activitybymonth
 
 # We can select only users below some threshold from the two groups in order to be able to compare activity in the post-email period. 
 
-# In[893]:
+# In[953]:
 
 # Select only users below a threshhold
 # Here the 'threshhold' is to only include users that were inactive
@@ -263,39 +241,40 @@ testComp=newComp[newComp['prelendA']<40]
 
 # The table above compares the mean amount given in the 0.5 months before the email was received between treatment and control groups, provided only users with 0 loans in the 'pre' period. As shown below, this still leaves 250+ participants in each group (although we'll see later only 100+ have data for 1+ months in the post period).
 
-# In[894]:
+# In[954]:
 
 testComp[['prelend','email']].groupby('email').count()
 
 
-# In[895]:
+# In[955]:
 
 newComp[['prelend','email']].groupby('email').count()
 
 
 # The table below shows how many 
 
-# In[896]:
+# In[956]:
 
 testComp[['preact','mon1act','mon2act','mon3act','postSum','email']].groupby('email').count()
 
 
-# In[896]:
+# In[956]:
 
 
 
 
 # Implement t-test for impact of Emails on retention, lending for new users
 
-# In[897]:
+# In[957]:
 
 #We can run a t-test to show if 
 from scipy.stats import ttest_ind
 
 def emailTtest(dframe, depvar):
-    #Run t-test comparing those who received email vs those who didn't
+    # Run t-test comparing those who received email vs those who didn't
     # Select rows of treatment and control groups that have values for the 
     #    dependent variable of interest 
+    # Note: Scipy runs 2-tailed t-test, so for 1-tailed pval, divide by 2
     Treatframe = dframe[(dframe['email']==True) & (dframe[depvar]>-1)]
     Contframe = dframe[(dframe['email']==False) & (dframe[depvar]>-1)]
     # outputs are t-statistic and p-value
@@ -303,7 +282,7 @@ def emailTtest(dframe, depvar):
 
 
 
-# In[898]:
+# In[958]:
 
 #Dependent variable of interest:
 output='postSum'
@@ -311,7 +290,7 @@ output='postSum'
 print tstat,pval
 
 
-# In[907]:
+# In[959]:
 
 #Histogram distributions in the whole data set for treatment and control group
 a=subplot(1,2,1)
@@ -322,17 +301,17 @@ plt.hist(list(newComp['postSum'][(newComp['email']==False) &                    
 
 # Tables below show the mean for test and control groups for activity and lending.
 
-# In[906]:
+# In[960]:
 
 testComp[['preactA','mon1act','mon2act','mon3act','email']].        groupby('email').mean()
 
 
-# In[905]:
+# In[961]:
 
 testComp[['prelendA','mon1lend','mon2lend','mon3lend','postSum','email']].        groupby('email').mean()
 
 
-# In[888]:
+# In[962]:
 
 a=subplot(1,2,1)
 lendingbymonth=testComp[['prelendA','mon1lend','mon2lend','mon3lend','email',]]    .groupby('email').mean()
@@ -348,6 +327,12 @@ plt.bar([1.3,2.3,3.3,4.3],activitybymonth.iloc[1,:],width=.3,color='red')
 plt.xticks([1.3,2.3,3.3,4.3], ['active btwn bid1 & email','1st month post',                               '1st month post',                               '2nd month post',             '3rd month post','4th month post'], rotation='vertical');
 b.set_ylabel('fraction active')
 
+
+# This figure shows mean lending & fraction active by month for case when we've restricted analysis to those with lending of $40/month or less in the period between the first bid and receiving a personal email from Zidisha staff for the treatment group (red) and the control group (blue).   
+# 
+# Here we see that activity does not appear to be strongly affected by receipt of the email.  
+# 
+# The mean lending does appear to increase, however, after receiving the email. According to the ttest conducted above, the mean monthly lending was about $11 after receiving a personal email, compared to about $3 monthly lending for those who did not receive the email. This difference in means has a one-tailed p-value of 0.11. I.e., it is more likely than not that those that received a personal email did lend more than those that did not, following receipt of the email, however there is an 11% chance that a difference of this size or greater could have occured through random chance. 
 
 # In[ ]:
 
